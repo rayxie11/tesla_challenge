@@ -1,7 +1,6 @@
-#pragma once
-
 #include "util.h"
 
+#define _USE_MATH_DEFINES
 #include <cmath>
 
 // Earth radius constant
