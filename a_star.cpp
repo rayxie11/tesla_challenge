@@ -1,6 +1,6 @@
 #include <a_star.h>
 
-// Astar constructor
+// Astar object constructor
 Astar::Astar(std::array<row, 303>& network, 
              std::unordered_map<std::string, std::array<double, 3>>& chargerMap,
              std::string initCharger, std::string goalCharger,
@@ -19,7 +19,7 @@ Astar::Astar(std::array<row, 303>& network,
                 // Calculate initial to goal charger estimated cost
                 double initGoalCost = Util::dist(this->chargerMap[this->initCharger],
                                                  this->chargerMap[this->goalCharger]);
-                cha::charger initChargerEstCost(this->initCharger, initGoalCost);
+                cha::toChargerCost initChargerEstCost(this->initCharger, initGoalCost);
 
                 // openPQueue stores chargers to be visited in PQueue
                 this->openPQueue.push(initChargerEstCost);
@@ -95,7 +95,7 @@ bool Astar::solve(){
     // Continuously explore neighboring chargers until none is left
     while (!openPQueue.empty() > 0){
         // Find charger and car condition with the minimum estimated cost through
-        cha::charger curChargerCost = openPQueue.top();
+        cha::toChargerCost curChargerCost = openPQueue.top();
         std::string curCharger = curChargerCost.name;
         double curCost = curChargerCost.val;
         tsl::car curCar = chargerCar[curCharger];
@@ -123,7 +123,7 @@ bool Astar::solve(){
             // Compute cost from initial to neighbor charger
             double newCost = costToArrive[curCharger]+cost(neighbor.first,curCharger);
 
-            cha::charger neighborChargerCost(neighbor.first,newCost);
+            cha::toChargerCost neighborChargerCost(neighbor.first,newCost);
 
             double battLeft = neighbor.second.batt;
             

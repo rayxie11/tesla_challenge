@@ -35,7 +35,7 @@ private:
     // Astar solver params
     std::unordered_set<std::string> closedSet;
     std::unordered_set<std::string> openSet;
-    std::priority_queue<cha::charger> openPQueue;
+    std::priority_queue<cha::toChargerCost> openPQueue;
     std::unordered_map<std::string, tsl::car> chargerCar;
     std::unordered_map<std::string, std::string> cameFrom;
     std::unordered_map<std::string, double> costToArrive;
