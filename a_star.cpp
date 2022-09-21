@@ -4,39 +4,41 @@
 Astar::Astar(std::array<row, 303>& network, 
              std::unordered_map<std::string, std::array<double, 3>>& chargerMap,
              std::string initCharger, std::string goalCharger,
-             double v, double batt)
+             tsl::car initCar)
              {
+                // Set initial and goal charger names
                 this->initCharger = initCharger;
                 this->goalCharger = goalCharger;
+
+                // Set chargerMap
                 this->chargerMap = chargerMap;
-                this->car.v = v;
-                this->car.batt = batt;
-                this->time = 0.0;
 
+                // Set initial car
+                this->car = initCar;
+                
+                // Calculate initial to goal charger estimated cost
+                double initGoalCost = Util::dist(this->chargerMap[this->initCharger],
+                                                 this->chargerMap[this->goalCharger]);
+                cha::charger initChargerEstCost(this->initCharger, initGoalCost);
+
+                // openPQueue stores chargers to be visited in PQueue
+                this->openPQueue.push(initChargerEstCost);
+
+                // openSet stores chargers to be visited
                 this->openSet.insert(this->initCharger);
+
+                // chargerCar stores charger and car condition
                 this->chargerCar[this->initCharger] = this->car;
+
+                // costToArrive stores cost to arrive at charger
                 this->costToArrive[this->initCharger] = 0.0;
+
+                // chargetime stores time charing at charger
                 this->chargeTime[this->initCharger] = 0.0;
-                this->estCostThrough[this->initCharger] = Util::dist(this->chargerMap[this->initCharger],
-                                                                     this->chargerMap[this->goalCharger]);
+
+                // estCostThrough stores estimates cost through charger to goal charger
+                this->estCostThrough[this->initCharger] = initGoalCost;
              }
-
-
-// Find the min estimated cost through current charger to goal charger
-std::string Astar::findBestEstCostThrough(){
-    double minCost = DBL_MAX;
-    std::string res = "";
-
-    // Loop through openSet to find charger with minimum estimated cost through
-    for (std::string charger:openSet){
-        double cost = estCostThrough[charger];
-        if (minCost > cost){
-            minCost = cost;
-            res = charger;
-        }
-    }
-    return res;
-}
 
 
 // Build the output string for found solution path
@@ -71,9 +73,7 @@ std::vector<std::pair<std::string, tsl::car>> Astar::findNeighbors(std::string s
         std::array<double, 3> chargerParam = {elem.lat,elem.lon,elem.rate};
         double distance = Util::dist(chargerParam,curCharger);
         if (distance <= curCar.batt){
-            tsl::car newCar;
-            newCar.v = curCar.v;
-            newCar.batt = curCar.batt-distance;
+            tsl::car newCar(curCar.v,curCar.batt-distance);
             std::pair<std::string, tsl::car> newPair(elem.name,newCar);
             res.push_back(newPair);
         }
@@ -93,15 +93,12 @@ double Astar::cost(std::string s1, std::string s2){
 // Astar solver function
 bool Astar::solve(){
     // Continuously explore neighboring chargers until none is left
-    while (openSet.size() > 0){
-
-        //std::cout << openSet.size() << std::endl;
-
+    while (!openPQueue.empty() > 0){
         // Find charger and car condition with the minimum estimated cost through
-        std::string curCharger = Astar::findBestEstCostThrough();
+        cha::charger curChargerCost = openPQueue.top();
+        std::string curCharger = curChargerCost.name;
+        double curCost = curChargerCost.val;
         tsl::car curCar = chargerCar[curCharger];
-
-        //std::cout << "this is curCharger: " << curCharger << std::endl;
 
         // Reconstruct path if goalCharger is reached
         if (curCharger == goalCharger){
@@ -109,22 +106,14 @@ bool Astar::solve(){
             return true;
         }
 
-        // Remove curCharger from openSet and add to closedSet
+        // Remove curCharger from openSet, openPQueue and add to closedSet
         openSet.erase(curCharger);
+        openPQueue.pop();
         closedSet.insert(curCharger);
 
         // Find curCar's next possible chargers from curCharger
         std::vector<std::pair<std::string, tsl::car>> neighbors = findNeighbors(curCharger,curCar);
         
-        //std::cout << "after erase: " << openSet.size() << std::endl;
-        /*
-        for (std::pair<std::string, tsl::car> neighbor:neighbors){
-            std::cout << neighbor.first << std::endl;
-        }
-        */
-        
-        //std::cout << "new neighbors.size: " << neighbors.size() << std::endl;
-
         // Loop through all next possible chargers
         for (std::pair<std::string, tsl::car> neighbor:neighbors){
             // If in closedSet (visited), continue to prevent cycles
@@ -134,13 +123,16 @@ bool Astar::solve(){
             // Compute cost from initial to neighbor charger
             double newCost = costToArrive[curCharger]+cost(neighbor.first,curCharger);
 
+            cha::charger neighborChargerCost(neighbor.first,newCost);
+
             double battLeft = neighbor.second.batt;
             
             neighbor.second.batt = 320.0;
             
-            // If not in openSet (not visited), add to openSet
+            // If not in openSet (not visited), add to openSet and openPQueue
             if (!openSet.count(neighbor.first)){
                 openSet.insert(neighbor.first);
+                openPQueue.push(neighborChargerCost);
                 // Continue if cost from initial to neighbor charge is greater than stored cost
             } else if (newCost > costToArrive[neighbor.first]){
                 continue;
@@ -153,11 +145,6 @@ bool Astar::solve(){
             std::array<double, 3> neighParam = chargerMap[neighbor.first];
             chargeTime[neighbor.first] = (320.0-battLeft)/neighParam[2];
         }
-        
-        //std::cout << " " << std::endl;
-        //std::cout << "this is after insert: " << openSet.size() << std::endl;
-
-        //break;
     }
     return false;
 }

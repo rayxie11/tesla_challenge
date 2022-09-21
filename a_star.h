@@ -6,11 +6,12 @@
 #include <unordered_set>
 #include <vector>
 #include <utility>
+#include <queue>
 
 #include <network.h>
 #include <util.h>
 #include <float.h>
-#include <car.h>
+#include <structs.h>
 
 class Astar{
 public:
@@ -18,7 +19,7 @@ public:
     Astar(std::array<row, 303>& network, 
           std::unordered_map<std::string, std::array<double, 3>>& chargerMap,
           std::string initCharger, std::string goalCharger,
-          double v, double batt);
+          tsl::car initCar);
 
     // Member functions
     bool solve();
@@ -34,6 +35,7 @@ private:
     // Astar solver params
     std::unordered_set<std::string> closedSet;
     std::unordered_set<std::string> openSet;
+    std::priority_queue<cha::charger> openPQueue;
     std::unordered_map<std::string, tsl::car> chargerCar;
     std::unordered_map<std::string, std::string> cameFrom;
     std::unordered_map<std::string, double> costToArrive;
@@ -45,7 +47,7 @@ private:
     std::string outputStr;
 
     // Member functions
-    std::string findBestEstCostThrough();
+    //std::string findBestEstCostThrough();
     double cost(std::string s1, std::string s2);
     void reconstructPath();
     std::vector<std::pair<std::string, tsl::car>> findNeighbors(std::string s, tsl::car curCar);

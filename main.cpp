@@ -2,6 +2,7 @@
 
 #include "network.h"
 #include "util.h"
+#include "structs.h"
 #include "a_star.h"
 
 extern std::array<row, 303> network;
@@ -17,9 +18,8 @@ int main(int argc, char** argv)
     std::string initial_charger_name = argv[1];
     std::string goal_charger_name = argv[2];
 
-    // Set intial car battery life and velocity
-    double velocity = 105.0;
-    double batteryLife = 320.0;
+    // Set intial car condition
+    tsl::car initCar(105.0,320.0);
 
     // Generate chargerMap
     std::unordered_map<std::string, std::array<double, 3>> chargerMap = Util::getChargerMap(network); 
@@ -30,7 +30,7 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    Astar solution(network,chargerMap,initial_charger_name,goal_charger_name,velocity,batteryLife);
+    Astar solution(network,chargerMap,initial_charger_name,goal_charger_name,initCar);
     bool solve = solution.solve();
 
     std::cout << solve << std::endl;
