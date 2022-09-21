@@ -36,7 +36,7 @@ Astar::Astar(std::array<row, 303>& network,
                 // chargetime stores time charing at charger
                 this->chargeTime[this->initCharger] = 0.0;
 
-                // estCostThrough stores estimates cost through charger to goal charger
+                // estCostThrough stores estimated cost through charger to goal charger
                 this->estCostThrough[this->initCharger] = initGoalCost;
              }
 
