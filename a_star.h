@@ -1,52 +1,52 @@
 #pragma once
-#include <string>
 #include <iostream>
+#include <string>
 #include <array>
 #include <unordered_map>
 #include <unordered_set>
-#include <eigen3/Eigen/Core>
+#include <vector>
+#include <utility>
 
 #include <network.h>
 #include <util.h>
 #include <float.h>
+#include <car.h>
 
 class Astar{
 public:
-    // Constructors
+    // Constructor
     Astar(std::array<row, 303>& network, 
-          std::unordered_map<std::string, std::array<double, 3>>& stationMap,
-          Eigen::MatrixXd& posMat,
+          std::unordered_map<std::string, std::array<double, 3>>& chargerMap,
           std::string initCharger, std::string goalCharger,
-          double carV, double carBatt);
-    
+          double v, double batt);
+
     // Member functions
     bool solve();
+    std::string showPath();
 
 private:
-    // Params passed from constructor
+    // Params passed in from constructor
     std::string initCharger;
     std::string goalCharger;
-    Eigen::MatrixXd posMat;
-    std::unordered_map<std::string, std::array<double, 3>> stationMap;
+    std::unordered_map<std::string, std::array<double, 3>> chargerMap;
+    tsl::car car;
 
-    // Astar solving params
+    // Astar solver params
     std::unordered_set<std::string> closedSet;
     std::unordered_set<std::string> openSet;
+    std::unordered_map<std::string, tsl::car> chargerCar;
     std::unordered_map<std::string, std::string> cameFrom;
     std::unordered_map<std::string, double> costToArrive;
     std::unordered_map<std::string, double> estCostThrough;
     std::unordered_map<std::string, double> chargeTime;
 
-    // Astar solution storage params 
-    std::array<std::string, 303> waypointChargers;
-    std::array<double, 303> chargingTimes;
+    // Astar solution params
+    double time;
     std::string outputStr;
 
     // Member functions
     std::string findBestEstCostThrough();
     double cost(std::string s1, std::string s2);
     void reconstructPath();
-    std::unordered_set<std::string> findNeighbors(std::string s);
-
-    
+    std::vector<std::pair<std::string, tsl::car>> findNeighbors(std::string s, tsl::car curCar);
 };

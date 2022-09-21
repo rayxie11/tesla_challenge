@@ -1,5 +1,3 @@
-#include <eigen3/Eigen/Core>
-#include <unordered_map>
 #include <string>
 
 #include "network.h"
@@ -18,30 +16,27 @@ int main(int argc, char** argv)
     
     std::string initial_charger_name = argv[1];
     std::string goal_charger_name = argv[2];
-    
-    double carBatt = 320.0;    // Initial car battery life
-    double carV = 105.0;       // Car velocity
 
-    // stationMap key: charger name, value: charger location, charging rate
-    std::unordered_map<std::string, std::array<double, 3>> stationMap; 
-    // posMat contains longitudes and altitudes for all chargers
-    Eigen::MatrixXd posMat(303,2); 
+    // Set intial car battery life and velocity
+    double velocity = 105.0;
+    double batteryLife = 320.0;
 
-    for (int i = 0; i < network.size(); i++){
-        posMat(i,0) = network[i].lat;
-        posMat(i,1) = network[i].lon;
-        std::array<double, 3> params = {network[i].lat,network[i].lon,network[i].rate};
-        stationMap[network[i].name] = params;
-    }
+    // Generate chargerMap
+    std::unordered_map<std::string, std::array<double, 3>> chargerMap = Util::getChargerMap(network); 
     
     // Check if intial and goal charger is present in network;
-    if (!stationMap.count(initial_charger_name) || !stationMap.count(goal_charger_name)){
-        std::cout << "Error: either initial or goal charger is not in network" << std::endl;
+    if (!chargerMap.count(initial_charger_name) || !chargerMap.count(goal_charger_name)){
+        std::cout << "Error: either initial or goal supercharger is not in network" << std::endl;
         return -1;
     }
 
-    Astar solution(network,stationMap,posMat,initial_charger_name,goal_charger_name,carV,carBatt);
+    Astar solution(network,chargerMap,initial_charger_name,goal_charger_name,velocity,batteryLife);
     bool solve = solution.solve();
+
+    std::cout << solve << std::endl;
+
+    std::string res = solution.showPath();
+    std::cout << res << std::endl;
 
 
     //std::cout << "what" << std::endl;
