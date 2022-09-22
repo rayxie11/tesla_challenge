@@ -8,17 +8,18 @@
 #include <utility>
 #include <queue>
 
-#include <network.h>
-#include <util.h>
-#include <float.h>
-#include <structs.h>
-#include <path.h>
+#include "network.h"
+#include "util.h"
+#include "float.h"
+#include "structs.h"
+#include "path.h"
+
+extern std::array<row, 303> network;
 
 class Astar{
 public:
     // Constructor
-    Astar(std::array<row, 303>& network, 
-          std::unordered_map<std::string, std::array<double, 3>>& chargerMap,
+    Astar(std::unordered_map<std::string, std::array<double, 3>>& chargerMap,
           std::string initCharger, std::string goalCharger,
           tsl::car initCar);
 
@@ -44,7 +45,7 @@ private:
     std::unordered_map<std::string, std::string> cameFrom;
     std::unordered_map<std::string, double> costToArrive;
     std::unordered_map<std::string, double> estCostThrough;
-    std::unordered_map<std::string, double> chargeTime;
+    //std::unordered_map<std::string, double> chargeTime;
 
     // Astar solution params
     double time;
@@ -55,5 +56,5 @@ private:
     double dist(std::string s1, std::string s2);
     double cost(std::string s1, std::string s2);
     void reconstructPath(Path path);
-    std::vector<cha::chargerCar> findNeighbors(std::string s, tsl::car curCar);
+    std::vector<std::string> findNeighbors(std::string s, tsl::car curCar);
 };

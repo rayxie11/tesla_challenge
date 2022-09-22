@@ -1,8 +1,9 @@
-#include <a_star.h>
+#include "a_star.h"
+
+extern std::array<row, 303> network;
 
 // Astar object constructor
-Astar::Astar(std::array<row, 303>& network, 
-             std::unordered_map<std::string, std::array<double, 3>>& chargerMap,
+Astar::Astar(std::unordered_map<std::string, std::array<double, 3>>& chargerMap,
              std::string initCharger, std::string goalCharger,
              tsl::car initCar)
              {
@@ -14,8 +15,8 @@ Astar::Astar(std::array<row, 303>& network,
                 this->chargerMap = chargerMap;
                 
                 // Calculate initial to goal charger estimated cost
-                double initGoalCost = dist(this->initCharger, this->goalCharger);
-                cha::toChargerCost initChargerEstCost(this->initCharger, initGoalCost);
+                double initEstCost = dist(this->initCharger, this->goalCharger);
+                cha::toChargerCost initChargerEstCost(this->initCharger, initEstCost);
 
                 // openPQueue stores chargers to be visited in PQueue
                 this->openPQueue.push(initChargerEstCost);
@@ -29,8 +30,8 @@ Astar::Astar(std::array<row, 303>& network,
                 */
                 
                 // chargerPath stores charger and the path from initial to current charger
-                Path initPath(this->chargerMap,this->initCharger,initCar);
-                this->chargerPath[this->initCharger] = initPath;
+                Path initPath(chargerMap, initCharger, initCar);
+                this->chargerPath[initCharger] = initPath;
 
                 // costToArrive stores cost to arrive at charger
                 this->costToArrive[this->initCharger] = 0.0;
@@ -41,7 +42,7 @@ Astar::Astar(std::array<row, 303>& network,
                 */
                 
                 // estCostThrough stores estimated cost through charger to goal charger
-                this->estCostThrough[this->initCharger] = initGoalCost;
+                this->estCostThrough[this->initCharger] = initEstCost;
              }
 
 
@@ -67,9 +68,8 @@ void Astar::reconstructPath(Path path){
 
 
 // Find valid chargers that the car can reach right now
-std::vector<cha::chargerCar> Astar::findNeighbors(std::string s, tsl::car curCar){
-    std::vector<cha::chargerCar> res;
-    std::array<double, 3> curCharger = chargerMap[s];
+std::vector<std::string> Astar::findNeighbors(std::string s, tsl::car curCar){
+    std::vector<std::string> res;
 
     // Loop through all chargers to see if reachable by curCar
     for (row elem:network){
@@ -79,9 +79,7 @@ std::vector<cha::chargerCar> Astar::findNeighbors(std::string s, tsl::car curCar
         }
         double distance = Util::dist(chargerMap, elem.name, s);
         if (distance <= curCar.batt){
-            tsl::car newCar(curCar.batt-distance);
-            cha::chargerCar newChargerCar(elem.name,elem.rate,0.0,newCar);
-            res.push_back(newChargerCar);
+            res.push_back(elem.name);
         }
     }
     return res;
@@ -108,6 +106,10 @@ double Astar::cost(std::string s1, std::string s2){
 bool Astar::solve(){
     // Continuously explore neighboring chargers until none is left
     while (!openPQueue.empty() > 0){
+
+        //std::cout << "front loop openPQueue size: " << openPQueue.size() << std::endl;
+
+
         // Find charger and car condition with the minimum estimated cost through
         cha::toChargerCost curChargerCost = openPQueue.top();
         std::string curCharger = curChargerCost.name;
@@ -116,7 +118,7 @@ bool Astar::solve(){
         // Get the path that leads to curCharger
         Path curPath = chargerPath[curCharger];
         // Get current car configuration
-        tsl::car curCar = curPath.getCurChargerCar().car;
+        tsl::car curCar = curPath.getCurWayPoint().car;
 
         // Reconstruct path if goalCharger is reached
         if (curCharger == goalCharger){
@@ -130,40 +132,76 @@ bool Astar::solve(){
         closedSet.insert(curCharger);
 
         // Find curCar's next possible chargers from curCharger
-        std::vector<cha::chargerCar> neighbors = findNeighbors(curCharger, curCar);
+        std::vector<std::string> neighbors = findNeighbors(curCharger, curCar);
 
         // If no neighbors, not enough battery life, search with full battery life
         bool needToCharge = false;
         if (neighbors.size() == 0){
             tsl::car fullCar(320.0);
-            neighbors = findNeighbors(curCharger, curCar);
+            neighbors = findNeighbors(curCharger, fullCar);
             needToCharge = true;
         }
+
+        //std::cout << "# of neighbors: " << neighbors.size() << std::endl;
         
         // Loop through all next possible chargers
-        for (cha::chargerCar neighbor:neighbors){
-            // If in closedSet (visited), continue to prevent cycles
-            if (closedSet.count(neighbor.name)){
+        for (std::string neighbor:neighbors){
+            // If in closedSet, continue to prevent cycles
+            if (closedSet.count(neighbor)){
                 continue;
             }
 
+            // Make a copy of the current path
+            Path newPath = curPath;
+            // New car condition at neighbor, battery life initialize to 0
+            tsl::car newCar(0.0);
+
             // If car needs to charge, go through current path to charge
             if (needToCharge){
-                double chargeNeeded = dist(curCharger, neighbor.name)-curCar.batt;
-                Path newPath = curPath;
+                //std::cout << "need charging" << std::endl;
+                double chargeNeeded = dist(curCharger, neighbor)-curCar.batt;
                 bool isCharged = newPath.chargeCar(chargeNeeded);
                 // If not charged, neighbor unreachable, give up this search
                 if (!isCharged){
-                    continue;
-                }
 
+                    //std::cout << "charging unavailable" << std::endl;
+
+                    continue;
+                } 
             }
 
             // Compute cost from initial to neighbor charger
-            double newCost = costToArrive[curCharger]+cost(neighbor.first,curCharger);
+            double newCost = costToArrive[curCharger]+cost(neighbor, curCharger);
+            cha::toChargerCost neighborChargerCost(neighbor, newCost);
 
-            cha::toChargerCost neighborChargerCost(neighbor.first,newCost);
+            // If no need to charge, compute battery life left after travelling to this neighbor
+            if (!needToCharge){
+                double battLeft = curCar.batt-dist(curCharger, neighbor);
+                newCar.batt = battLeft;
+            }
 
+            // Update path up until this neighbor
+            newPath.addCharger(neighbor, newCar);
+            
+            //std::cout << "openSet contains neighbor: " << openSet.count(neighbor) << std::endl;
+            //std::cout << "new cost: " << newCost << std::endl;
+
+            // If not in openSet, add to openSet and openPQueue
+            if (!openSet.count(neighbor)){
+                //std::cout << "added neighbor" << std::endl;
+                openSet.insert(neighbor);
+                openPQueue.push(neighborChargerCost);
+                // Continue if cost from initial to neighbor charge is greater than stored cost
+            } else if (newCost > costToArrive[neighbor]){
+                continue;
+            }
+
+            // Store params
+            cameFrom[neighbor] = curCharger;
+            costToArrive[neighbor] = newCost;
+            estCostThrough[neighbor] = newCost+dist(neighbor, goalCharger);
+            chargerPath[neighbor] = newPath;
+            /*
             double battLeft = neighbor.second.batt;
             
             neighbor.second.batt = 320.0;
@@ -179,11 +217,15 @@ bool Astar::solve(){
             cameFrom[neighbor.first] = curCharger;
             costToArrive[neighbor.first] = newCost;
             estCostThrough[neighbor.first] = newCost+cost(neighbor.first,goalCharger);
-            chargerCar[neighbor.first] = neighbor.second;
+            //chargerCar[neighbor.first] = neighbor.second;
 
             std::array<double, 3> neighParam = chargerMap[neighbor.first];
-            chargeTime[neighbor.first] = (320.0-battLeft)/neighParam[2];
+            //chargeTime[neighbor.first] = (320.0-battLeft)/neighParam[2];
+            */
         }
+
+        //std::cout << "end loop openPQueue size: " << openPQueue.size() << std::endl;
+        std::cout << " " << std::endl;
     }
     return false;
 }

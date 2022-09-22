@@ -6,30 +6,31 @@
 #include <array>
 #include <unordered_map>
 
-#include <structs.h>
+#include "structs.h"
 
 class Path{
 public:
-    // Constructor
+    // Constructors
     Path(std::unordered_map<std::string, std::array<double, 3>>& chargerMap,
          std::string initCharger, tsl::car initCar);
+    Path();
     
     // Copy constructor
-    Path(Path& rhs);
+    Path(const Path& rhs);
 
     // Member functions
     bool updateBestCharger(bool pop);
     std::string getOutputStr();
     bool chargeCar(double chargeRequired);
     void addCharger(std::string charger, tsl::car car);
-    cha::chargerCar getCurChargerCar();
+    cha::waypoint getCurWayPoint();
 
     // Storage params
-    cha::chargerCar bestCharger;
+    cha::waypoint bestCharger;
 
 private:
     // Storage params
-    std::priority_queue<cha::chargerCar> chargerQ;
-    std::vector<cha::chargerCar> path;
+    std::priority_queue<cha::waypoint> chargerQ;
+    std::vector<cha::waypoint> path;
     std::unordered_map<std::string, std::array<double, 3>> chargerMap;
 };

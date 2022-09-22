@@ -23,15 +23,15 @@ int main(int argc, char** argv)
     tsl::car initCar(initBatt);
 
     // Generate chargerMap
-    std::unordered_map<std::string, std::array<double, 3>> chargerMap = Util::getChargerMap(network); 
+    std::unordered_map<std::string, std::array<double, 3>> chargerMap = Util::getChargerMap(); 
     
     // Check if intial and goal charger is present in network;
-    if (Util::checkValid(initial_charger_name,goal_charger_name,chargerMap)){
+    if (Util::checkValid(initial_charger_name, goal_charger_name, chargerMap)){
         std::cout << "Error: either initial or goal supercharger is not in network" << std::endl;
         return -1;
     }
 
-    Astar solution(network,chargerMap,initial_charger_name,goal_charger_name,initCar);
+    Astar solution(chargerMap, initial_charger_name, goal_charger_name, initCar);
     bool solve = solution.solve();
 
     std::cout << solve << std::endl;

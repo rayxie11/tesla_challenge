@@ -5,6 +5,7 @@
 #include <array>
 #include <string>
 #include <unordered_map>
+
 #include "network.h"
 
 extern std::array<row, 303> network;

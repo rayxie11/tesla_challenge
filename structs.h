@@ -24,15 +24,15 @@ namespace cha{
         }
     };
 
-    struct chargerCar
+    struct waypoint
     {
         std::string name;        // Name of charger
         double speed;            // Charging speed
         double chargeTime = 0.0; // Charging time at charger
         tsl::car car;            // Car condition at charger
-        chargerCar(std::string name, double speed, double chargeTime, tsl::car car):name(name),speed(speed),chargeTime(chargeTime),car(car){}
-        chargerCar():name(""),speed(0.0),chargeTime(0.0),car(car){}
-        bool operator< (const chargerCar& b) const{
+        waypoint(std::string name, double speed, tsl::car car):name(name),speed(speed),car(car){}
+        waypoint():name(""),speed(0.0),car(car){}
+        bool operator< (const waypoint& b) const{
             return speed>b.speed;
         }
     };
