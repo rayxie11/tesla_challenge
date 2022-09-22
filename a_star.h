@@ -12,6 +12,7 @@
 #include <util.h>
 #include <float.h>
 #include <structs.h>
+#include <path.h>
 
 class Astar{
 public:
@@ -36,7 +37,10 @@ private:
     std::unordered_set<std::string> closedSet;
     std::unordered_set<std::string> openSet;
     std::priority_queue<cha::toChargerCost> openPQueue;
-    std::unordered_map<std::string, tsl::car> chargerCar;
+
+    //std::unordered_map<std::string, tsl::car> chargerCar;
+    std::unordered_map<std::string, Path> chargerPath;
+
     std::unordered_map<std::string, std::string> cameFrom;
     std::unordered_map<std::string, double> costToArrive;
     std::unordered_map<std::string, double> estCostThrough;
@@ -48,7 +52,8 @@ private:
 
     // Member functions
     //std::string findBestEstCostThrough();
+    double dist(std::string s1, std::string s2);
     double cost(std::string s1, std::string s2);
-    void reconstructPath();
-    std::vector<std::pair<std::string, tsl::car>> findNeighbors(std::string s, tsl::car curCar);
+    void reconstructPath(Path path);
+    std::vector<cha::chargerCar> findNeighbors(std::string s, tsl::car curCar);
 };

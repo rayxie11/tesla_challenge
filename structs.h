@@ -5,11 +5,11 @@
 namespace tsl{
     struct car
     {   
-        double v;                   // Velocity in km/h
+        double v = 105.0;           // Velocity in km/h
         double batt;                // Battery life in km
         double topBatt = 320.0;     // Top battery life in km
-        car(double v, double batt): v(v),batt(batt){}
-        car(): v(0.0),batt(0.0){};
+        car(double batt): batt(batt){}
+        car(): batt(0.0){};
     };
 }
 

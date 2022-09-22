@@ -13,12 +13,16 @@ public:
     // Constructor
     Path(std::unordered_map<std::string, std::array<double, 3>>& chargerMap,
          std::string initCharger, tsl::car initCar);
+    
+    // Copy constructor
+    Path(Path& rhs);
 
     // Member functions
-    void updateBestCharger(bool pop);
+    bool updateBestCharger(bool pop);
     std::string getOutputStr();
-    void chargeCar(double chargeRequired);
+    bool chargeCar(double chargeRequired);
     void addCharger(std::string charger, tsl::car car);
+    cha::chargerCar getCurChargerCar();
 
     // Storage params
     cha::chargerCar bestCharger;

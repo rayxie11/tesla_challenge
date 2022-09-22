@@ -12,13 +12,9 @@ Astar::Astar(std::array<row, 303>& network,
 
                 // Set chargerMap
                 this->chargerMap = chargerMap;
-
-                // Set initial car
-                this->car = initCar;
                 
                 // Calculate initial to goal charger estimated cost
-                double initGoalCost = Util::dist(this->chargerMap[this->initCharger],
-                                                 this->chargerMap[this->goalCharger]);
+                double initGoalCost = dist(this->initCharger, this->goalCharger);
                 cha::toChargerCost initChargerEstCost(this->initCharger, initGoalCost);
 
                 // openPQueue stores chargers to be visited in PQueue
@@ -26,24 +22,33 @@ Astar::Astar(std::array<row, 303>& network,
 
                 // openSet stores chargers to be visited
                 this->openSet.insert(this->initCharger);
-
+                
+                /*
                 // chargerCar stores charger and car condition
                 this->chargerCar[this->initCharger] = this->car;
+                */
+                
+                // chargerPath stores charger and the path from initial to current charger
+                Path initPath(this->chargerMap,this->initCharger,initCar);
+                this->chargerPath[this->initCharger] = initPath;
 
                 // costToArrive stores cost to arrive at charger
                 this->costToArrive[this->initCharger] = 0.0;
 
+                /*
                 // chargetime stores time charing at charger
                 this->chargeTime[this->initCharger] = 0.0;
-
+                */
+                
                 // estCostThrough stores estimated cost through charger to goal charger
                 this->estCostThrough[this->initCharger] = initGoalCost;
              }
 
 
 // Build the output string for found solution path
-void Astar::reconstructPath(){
-    outputStr += goalCharger;
+void Astar::reconstructPath(Path path){
+    outputStr = path.getOutputStr()+goalCharger;
+    /*
     std::string curCharger = goalCharger;
 
     // Find the previous charger until it reaches the inital charger
@@ -57,11 +62,13 @@ void Astar::reconstructPath(){
         }
         curCharger = prevCharger;
     }
+    */
 }
 
+
 // Find valid chargers that the car can reach right now
-std::vector<std::pair<std::string, tsl::car>> Astar::findNeighbors(std::string s, tsl::car curCar){
-    std::vector<std::pair<std::string, tsl::car>> res;
+std::vector<cha::chargerCar> Astar::findNeighbors(std::string s, tsl::car curCar){
+    std::vector<cha::chargerCar> res;
     std::array<double, 3> curCharger = chargerMap[s];
 
     // Loop through all chargers to see if reachable by curCar
@@ -70,23 +77,30 @@ std::vector<std::pair<std::string, tsl::car>> Astar::findNeighbors(std::string s
         if (elem.name == s){
             continue;
         }
-        std::array<double, 3> chargerParam = {elem.lat,elem.lon,elem.rate};
-        double distance = Util::dist(chargerParam,curCharger);
+        double distance = Util::dist(chargerMap, elem.name, s);
         if (distance <= curCar.batt){
-            tsl::car newCar(curCar.v,curCar.batt-distance);
-            std::pair<std::string, tsl::car> newPair(elem.name,newCar);
-            res.push_back(newPair);
+            tsl::car newCar(curCar.batt-distance);
+            cha::chargerCar newChargerCar(elem.name,elem.rate,0.0,newCar);
+            res.push_back(newChargerCar);
         }
     }
     return res;
 }
 
 
-// Calculate the cost of travelling between stations
+// Calculate the travelling distance between chargers
+double Astar::dist(std::string s1, std::string s2){
+    return Util::dist(chargerMap, s1, s2);
+}
+
+
+// Calculate the cost of travelling from s1 to s2
 double Astar::cost(std::string s1, std::string s2){
-    std::array<double, 3> s1Param = chargerMap[s1];
-    std::array<double, 3> s2Param = chargerMap[s2];
-    return Util::dist(s1Param,s2Param);
+    double distance = dist(s1,s2);
+
+    // Faster charging station have smaller costs
+    double cost = distance-0.5*chargerMap[s2][2];
+    return cost;
 }
 
 
@@ -98,11 +112,15 @@ bool Astar::solve(){
         cha::toChargerCost curChargerCost = openPQueue.top();
         std::string curCharger = curChargerCost.name;
         double curCost = curChargerCost.val;
-        tsl::car curCar = chargerCar[curCharger];
+
+        // Get the path that leads to curCharger
+        Path curPath = chargerPath[curCharger];
+        // Get current car configuration
+        tsl::car curCar = curPath.getCurChargerCar().car;
 
         // Reconstruct path if goalCharger is reached
         if (curCharger == goalCharger){
-            Astar::reconstructPath();
+            reconstructPath(curPath);
             return true;
         }
 
@@ -112,14 +130,35 @@ bool Astar::solve(){
         closedSet.insert(curCharger);
 
         // Find curCar's next possible chargers from curCharger
-        std::vector<std::pair<std::string, tsl::car>> neighbors = findNeighbors(curCharger,curCar);
+        std::vector<cha::chargerCar> neighbors = findNeighbors(curCharger, curCar);
+
+        // If no neighbors, not enough battery life, search with full battery life
+        bool needToCharge = false;
+        if (neighbors.size() == 0){
+            tsl::car fullCar(320.0);
+            neighbors = findNeighbors(curCharger, curCar);
+            needToCharge = true;
+        }
         
         // Loop through all next possible chargers
-        for (std::pair<std::string, tsl::car> neighbor:neighbors){
+        for (cha::chargerCar neighbor:neighbors){
             // If in closedSet (visited), continue to prevent cycles
-            if (closedSet.count(neighbor.first)){
+            if (closedSet.count(neighbor.name)){
                 continue;
             }
+
+            // If car needs to charge, go through current path to charge
+            if (needToCharge){
+                double chargeNeeded = dist(curCharger, neighbor.name)-curCar.batt;
+                Path newPath = curPath;
+                bool isCharged = newPath.chargeCar(chargeNeeded);
+                // If not charged, neighbor unreachable, give up this search
+                if (!isCharged){
+                    continue;
+                }
+
+            }
+
             // Compute cost from initial to neighbor charger
             double newCost = costToArrive[curCharger]+cost(neighbor.first,curCharger);
 

@@ -19,13 +19,14 @@ int main(int argc, char** argv)
     std::string goal_charger_name = argv[2];
 
     // Set intial car condition
-    tsl::car initCar(105.0,320.0);
+    double initBatt = 320.0;
+    tsl::car initCar(initBatt);
 
     // Generate chargerMap
     std::unordered_map<std::string, std::array<double, 3>> chargerMap = Util::getChargerMap(network); 
     
     // Check if intial and goal charger is present in network;
-    if (!chargerMap.count(initial_charger_name) || !chargerMap.count(goal_charger_name)){
+    if (Util::checkValid(initial_charger_name,goal_charger_name,chargerMap)){
         std::cout << "Error: either initial or goal supercharger is not in network" << std::endl;
         return -1;
     }
