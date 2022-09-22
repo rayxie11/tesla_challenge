@@ -50,7 +50,6 @@ int main(int argc, char** argv)
     row s2 = network[1];
     double distance = Util::dist(s1,s2);
     std::cout << distance << std::endl;
-    //std::cout << initial_charger_name << std::endl;
     */
     return 0;
 }

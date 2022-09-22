@@ -44,12 +44,12 @@ std::string Path::getOutputStr(){
 
 // Update the best charger
 bool Path::updateBestCharger(bool pop){
-    // If charger PQueue is empty, charging is unavailable
+    // If charger PQueue is empty, no best charger
     if (chargerQ.size() == 0){
         return false;
     }
 
-    // If charger PQueue has one element and needs to be popped, charging is unavailable
+    // If charger PQueue has one element and needs to be popped, no best charger
     if (chargerQ.size() == 1 && pop){
         return false;
     }
