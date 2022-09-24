@@ -104,32 +104,42 @@ bool Path::verify(){
 bool Path::chargeCar(double chargeRequired){
 
     std::cout << "before charge: "<< getOutputStr() << std::endl;
+
     while (chargeRequired >= 0.0 && !chargerPQ.empty()){
+        // Get the fastest charger from chargerPQ
         cha::waypoint bestCharger = chargerPQ.top();
+
         std::cout << "best charger: " << bestCharger.name << std::endl;
         
+        // Calculate the max charge at bestCharger
         double maxCharge = bestCharger.car.topBatt-bestCharger.car.batt;
         if (maxCharge > chargeRequired){
-            //bestCharger.chargeTime += chargeRequired/bestCharger.speed;
-            //bestCharger.car.batt += chargeRequired;
+            // Add charging time and charged amount to bestCharger
             bestCharger.chargeTime += chargeRequired/bestCharger.speed;
             bestCharger.car.batt += chargeRequired;
+
+            // Deduct maxCharge (should be negative)
             chargeRequired -= maxCharge;
+
+            // Update bestCharger in path
             path[bestCharger.idx] = bestCharger;
+
+            // Pop bestCharger and push in the updated bestCharger
             chargerPQ.pop();
             chargerPQ.push(bestCharger);
             
         } else {
-            //bestCharger.chargeTime += maxCharge/bestCharger.speed;
-            //bestCharger.car.batt += maxCharge;
+            // Deduct maxCharge (should be positive)
             chargeRequired -= maxCharge;
+
+            // Add charging time and charged amount to bestCharger
             bestCharger.chargeTime += maxCharge/bestCharger.speed;
             bestCharger.car.batt += maxCharge;
-            path[bestCharger.idx] = bestCharger;
-            //bestCharger.chargeTime += maxCharge/bestCharger.speed;
-            //bestCharger.car.batt += maxCharge;
 
-            //
+            // Update bestCharger in path
+            path[bestCharger.idx] = bestCharger;
+
+            // Pop bestCharger (since current car has been fully charged)
             chargerPQ.pop();
         }
     }
