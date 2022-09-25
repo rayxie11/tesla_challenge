@@ -83,7 +83,7 @@ double Astar::time(std::string s1, std::string s2){
 
 // Calculate the cost of travelling between chargers
 double Astar::cost(std::string s1, std::string s2){
-    return dist(s1, s2)-0.1*chargerMap[s1][2];
+    return time(s1, s2)-0.01*chargerMap[s1][2];
     //return dist(s1, s2);
 }
 
@@ -209,7 +209,7 @@ bool Astar::solve(){
                 openPQueue.push(neighborChargerCost);
                 // Continue if cost from initial to neighbor charge is greater than stored cost
             } else if (newCost > costToArrive[neighbor]){
-                std::cout << "new cost > costToArrivew" << std::endl;
+                //std::cout << "new cost > costToArrivew" << std::endl;
                 continue;
             }
 

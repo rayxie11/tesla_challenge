@@ -28,6 +28,7 @@ Path::Path(const Path& rhs){
     this->chargerMap = rhs.chargerMap;
     this->chargerPQ = rhs.chargerPQ;
     this->path = rhs.path;
+    this->totTime = rhs.totTime;
 }
 
 
@@ -183,12 +184,12 @@ bool Path::chargeCar(double chargeRequired){
     if (chargeRequired > 0.0){
         return false;
     }
-    
+    /*
     std::cout << " " << std::endl;
     std::cout << "----check----" << std::endl;
     bool check = verify();
     std::cout << "----check----" << std::endl;
-    
+    */
     
     return true;
 }
