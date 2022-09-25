@@ -48,3 +48,31 @@ bool Util::checkValid(std::string initCharger, std::string goalCharger,
                       {
                         return !chargerMap.count(initCharger) || !chargerMap.count(goalCharger);
                       }
+
+/*
+bool Util::chargeCar(Path& partSol, double chargeRequired){
+    cha::waypoint bestCharger = partSol.chargerPQ.top();
+    while (chargeRequired > 0.0 && partSol.chargerPQ.size() > 0){
+        int idx = bestCharger.idx;
+        double maxCharge = 320-bestCharger.car.batt;
+        if (maxCharge > chargeRequired){
+          bestCharger.chargeTime += chargeRequired/bestCharger.speed;
+          bestCharger.car.batt += chargeRequired;
+          
+          partSol.path[idx] = bestCharger;
+          partSol.chargerPQ.pop();
+          partSol.chargerPQ.push(bestCharger);
+        } else {
+            bestCharger.chargeTime += maxCharge/bestCharger.speed;
+            bestCharger.car.batt += maxCharge;
+            partSol.path[idx] = bestCharger;
+            partSol.chargerPQ.pop();
+        }
+        chargeRequired -= maxCharge;
+        bestCharger = partSol.chargerPQ.top();
+    }
+    if (chargeRequired > 0){
+        return false;
+    }
+    return true;
+}*/

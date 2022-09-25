@@ -10,9 +10,9 @@
 #include <float.h>
 
 #include "network.h"
-#include "util.h"
 #include "structs.h"
 #include "path.h"
+#include "util.h"
 
 extern std::array<row, 303> network;
 

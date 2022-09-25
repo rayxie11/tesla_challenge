@@ -32,7 +32,7 @@ namespace cha{
         }
     };
 
-
+    /*
     struct waypoint
     {
         std::string name;        // Name of charger
@@ -48,7 +48,19 @@ namespace cha{
         // < operator for PQueue
         bool operator< (const waypoint& b) const{
             //return (speed+chargeTime*100)>(b.speed+b.chargeTime*100);
-            return speed>b.speed;
+            return speed<b.speed;
         }
+    };*/
+
+    struct waypoint
+    {
+        std::string name;        // Name of charger
+        double speed;            // Charging speed
+        double chargeTime = 0.0; // Charging time at charger
+        tsl::car car;            // Car condition at charger
+
+        // Constructors
+        waypoint(std::string name, double speed, tsl::car car):name(name),speed(speed),car(car){}
+        waypoint():name(""),speed(0.0),car(car){}
     };
 }

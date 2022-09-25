@@ -91,7 +91,7 @@ double Astar::cost(std::string s1, std::string s2){
 bool Astar::solve(){
     // Continuously explore neighboring chargers until none is left
     while (!openPQueue.empty() > 0){
-    //for (int i = 0; i < 4; i++){
+    //for (int i = 0; i < 20; i++){
         std::cout << "----------Beginning of loop:----------" << std::endl;
         // Find charger and car condition with the minimum estimated cost through
         cha::toChargerCost curChargerCost = openPQueue.top();
@@ -125,7 +125,9 @@ bool Astar::solve(){
             needToCharge = true;
         }
 
-        std::cout << "Number of neighbors: " << neighbors.size() << "; charge: " << needToCharge << std::endl;
+        std::cout << "before mod: " << curPath.getOutputStr() << std::endl;
+
+        //std::cout << "Number of neighbors: " << neighbors.size() << "; charge: " << needToCharge << std::endl;
         
         // Loop through all next possible chargers
         for (std::string neighbor:neighbors){
@@ -135,7 +137,7 @@ bool Astar::solve(){
                 continue;
             }
 
-            std::cout << "distance: " << dist(curCharger, neighbor) << ", curBatt: " << curCar.batt << std::endl;
+            //std::cout << "distance: " << dist(curCharger, neighbor) << ", curBatt: " << curCar.batt << std::endl;
 
             // Make a copy of the current path
             Path newPath(curPath);
@@ -146,10 +148,11 @@ bool Astar::solve(){
             // If car needs to charge, go through current path to charge
             //double chargeNeeded = 0.0;
             if (needToCharge){
-                std::cout << "-------charging-------" << std::endl;
+                //std::cout << "-------charging-------" << std::endl;
                 double chargeNeeded = dist(curCharger, neighbor)-curCar.batt;
+                //bool isCharged = Util::chargeCar(newPath, chargeNeeded);
                 bool isCharged = newPath.chargeCar(chargeNeeded);
-                std::cout << "-----end charging-----" << std::endl;
+                //std::cout << "-----end charging-----" << std::endl;
                 std::cout << "" << std::endl;
                 // If not charged, neighbor unreachable, give up this search
                 if (!isCharged){
@@ -162,9 +165,13 @@ bool Astar::solve(){
                 newCar.batt = battLeft;
             }
 
+            std::cout << curCharger << ", " << neighbor << ", distance: " << Util::dist(chargerMap, curCharger, neighbor) << std::endl;
+
             // Update path up until this neighbor
             newPath.addNewCharger(neighbor, newCar);
             chargerPath[neighbor] = newPath;
+
+            std::cout << "after mod: " << newPath.getOutputStr() << std::endl;
 
             //std::cout << newPath.getOutputStr() << std::endl;
             

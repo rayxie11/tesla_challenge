@@ -5,6 +5,7 @@
 #include <vector>
 #include <array>
 #include <unordered_map>
+#include <utility>
 
 #include "structs.h"
 #include "util.h"
@@ -20,6 +21,8 @@ public:
     Path(const Path& rhs);
 
     // Member functions
+    double checkMaxCharge(double proposedCharge, int idx);
+
     bool chargeCar(double chargeRequired);
     bool updateMaxLesReq();
     bool verify();
@@ -31,7 +34,7 @@ public:
     // Storage params
     //double totTime;
     //cha::waypoint bestCharger;
-    std::priority_queue<cha::waypoint> chargerPQ;
+    std::priority_queue<std::pair<double, int>> chargerPQ;
 
 private:
     // Storage params
