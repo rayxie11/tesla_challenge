@@ -1,3 +1,10 @@
+/*
+ * Songchun (Ray) Xie
+ * Tesla Coding Challenge Solution
+ * util.cpp
+ * This file implements all the utility functions specified in util.h
+*/
+
 #include "util.h"
 
 // Earth radius constant

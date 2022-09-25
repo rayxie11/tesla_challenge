@@ -1,5 +1,11 @@
-#pragma once
+/*
+ * Songchun (Ray) Xie
+ * Tesla Coding Challenge Solution
+ * structs.h
+ * This file specifies and implements structs: tsl::car, cha::toChargerCost, and cha::waypoint
+*/
 
+#pragma once
 #include <string>
 
 namespace tsl{
@@ -31,26 +37,6 @@ namespace cha{
             return cost>b.cost;
         }
     };
-
-    /*
-    struct waypoint
-    {
-        std::string name;        // Name of charger
-        double speed;            // Charging speed
-        double chargeTime = 0.0; // Charging time at charger
-        tsl::car car;            // Car condition at charger
-        int idx;                 // Index in path vector
-
-        // Constructors
-        waypoint(std::string name, double speed, tsl::car car, int idx):name(name),speed(speed),car(car),idx(idx){}
-        waypoint():name(""),speed(0.0),car(car),idx(0){}
-
-        // < operator for PQueue
-        bool operator< (const waypoint& b) const{
-            //return (speed+chargeTime*100)>(b.speed+b.chargeTime*100);
-            return speed<b.speed;
-        }
-    };*/
 
     struct waypoint
     {

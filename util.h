@@ -1,6 +1,11 @@
-#pragma once
+/*
+ * Songchun (Ray) Xie
+ * Tesla Coding Challenge Solution
+ * util.h
+ * This file is the header file for all utility functions
+*/
 
-#include <iostream>
+#pragma once
 #include <cmath>
 #include <array>
 #include <string>
@@ -16,6 +21,4 @@ namespace Util{
                 std::string s1, std::string s2);
     bool checkValid(std::string initCharger, std::string goalCharger, std::unordered_map<std::string, std::array<double, 3>>& chargerMap);
     std::unordered_map<std::string, std::array<double, 3>> getChargerMap();
-
-    //bool chargeCar(Path& partSol, double chargeRequired)
 }

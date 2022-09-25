@@ -1,5 +1,11 @@
+/*
+ * Songchun (Ray) Xie
+ * Tesla Coding Challenge Solution
+ * a_star.h
+ * This file is the header file for Astar class
+*/
+
 #pragma once
-#include <iostream>
 #include <string>
 #include <array>
 #include <unordered_map>

@@ -1,4 +1,12 @@
+/*
+ * Songchun (Ray) Xie
+ * Tesla Coding Challenge Solution
+ * main.ccp
+ * This file contains all the relevant to calls to solve the Tesla Coding Challege
+*/
+
 #include <string>
+#include <iostream>
 
 #include "network.h"
 #include "util.h"
