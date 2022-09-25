@@ -49,6 +49,7 @@ std::string Path::getOutputStr(){
 
     std::string res = "";
     for (int i = 1; i < path.size()-1; i++){
+    //for (int i = 0; i < path.size(); i++){
         cha::waypoint waypoint = path[i];
         res += waypoint.name+", "+std::to_string(waypoint.chargeTime)+", ";
     }
@@ -91,8 +92,8 @@ double Path::checkMaxCharge(double proposedCharge, int idx){
         }
         idx ++;
     }
-    std::cout << "tracker: " << tracker << ", orgIdx: " << orgIdx << std::endl;
-    std::cout << "before: " << chargerPQ.top().second << std::endl;
+    //std::cout << "tracker: " << tracker << ", orgIdx: " << orgIdx << std::endl;
+    //std::cout << "before: " << chargerPQ.top().second << std::endl;
     // Skip to charger with lowest allowed charge (charging at any previous charger is futile)
     if (maxCharge == 0){
         chargerPQ.pop();
@@ -104,26 +105,26 @@ double Path::checkMaxCharge(double proposedCharge, int idx){
         }
         chargerPQ.pop();
     }
-    std::cout << "after: " << chargerPQ.top().second << std::endl;
+    //std::cout << "after: " << chargerPQ.top().second << std::endl;
     return maxCharge;
 }
 
 
-
+ 
 // Charge the car at bestCharger
 bool Path::chargeCar(double chargeRequired){
     
     while (!chargerPQ.empty() && chargeRequired > 0){
         int idx = chargerPQ.top().second;
 
-        std::cout << path[idx].name << ":" << std::endl;
+        //std::cout << path[idx].name << ":" << std::endl;
 
 
         double actualCharge = checkMaxCharge(chargeRequired, idx);
         path[idx].chargeTime += actualCharge/path[idx].speed;
         path[idx].car.batt += actualCharge;
 
-        std::cout << "actual: " << actualCharge << "; required: " << chargeRequired << std::endl;
+        //std::cout << "actual: " << actualCharge << "; required: " << chargeRequired << std::endl;
         /*
         if (actualCharge < chargeRequired){
             chargerPQ.pop();
@@ -178,15 +179,13 @@ bool Path::chargeCar(double chargeRequired){
     if (chargeRequired > 0.0){
         return false;
     }
-    /*
+    
     std::cout << " " << std::endl;
     std::cout << "----check----" << std::endl;
     bool check = verify();
     std::cout << "----check----" << std::endl;
     
-    if (!check){
-        return false;
-    }*/
+    
     return true;
 }
 

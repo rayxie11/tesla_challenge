@@ -83,7 +83,20 @@ double Astar::time(std::string s1, std::string s2){
 
 // Calculate the cost of travelling between chargers
 double Astar::cost(std::string s1, std::string s2){
-    return dist(s1, s2)-chargerMap[s2][2];
+    //return dist(s1, s2)-0.1*chargerMap[s2][2];
+    return dist(s1, s2);
+}
+
+
+// Show PQ elements
+void Astar::showPQ(){
+    std::priority_queue<cha::toChargerCost> copy = openPQueue;
+    std::string res = "";
+    while (!copy.empty()){
+        res += copy.top().name+", ";
+        copy.pop();
+    }
+    std::cout << res << std::endl;
 }
 
 
@@ -91,11 +104,15 @@ double Astar::cost(std::string s1, std::string s2){
 bool Astar::solve(){
     // Continuously explore neighboring chargers until none is left
     while (!openPQueue.empty() > 0){
-        //std::cout << "----------Beginning of loop:----------" << std::endl;
+    //for (int i = 0; i < 3; i ++){
+        std::cout << "----------Beginning of loop:----------" << std::endl;
         // Find charger and car condition with the minimum estimated cost through
         cha::toChargerCost curChargerCost = openPQueue.top();
         std::string curCharger = curChargerCost.name;
         double curCost = curChargerCost.cost;
+
+        std::cout << "!!!!current charger: " << curCharger << std::endl;
+        showPQ();
 
         // Get the path that leads to curCharger
         Path curPath = chargerPath[curCharger];
@@ -124,13 +141,14 @@ bool Astar::solve(){
             needToCharge = true;
         }
 
+
         //std::cout << "before mod: " << curPath.getOutputStr() << std::endl;
 
         //std::cout << "Number of neighbors: " << neighbors.size() << "; charge: " << needToCharge << std::endl;
         
         // Loop through all next possible chargers
         for (std::string neighbor:neighbors){
-
+            //std::cout << neighbor << "; distance from curCharger: " << Util::dist(chargerMap, curCharger, neighbor) <<std::endl;
             //std::cout << "-----Beginning of neigh-----" << std::endl;
 
             // If in closedSet, continue to prevent cycles
@@ -141,13 +159,15 @@ bool Astar::solve(){
             //std::cout << "distance: " << dist(curCharger, neighbor) << ", curBatt: " << curCar.batt << std::endl;
 
             // Make a copy of the current path
-            Path newPath(curPath);
+            Path newPath = curPath;
 
             // New car condition at neighbor, battery life initialize to 0
             tsl::car newCar(0.0);
 
             // If car needs to charge, go through current path to charge
             //double chargeNeeded = 0.0;
+
+            //std::cout << "need charge: " << needToCharge << std::endl;
             if (needToCharge){
                 //std::cout << "-------charging-------" << std::endl;
                 double chargeNeeded = dist(curCharger, neighbor)-curCar.batt;
@@ -168,9 +188,7 @@ bool Astar::solve(){
 
             //std::cout << curCharger << ", " << neighbor << ", distance: " << Util::dist(chargerMap, curCharger, neighbor) << std::endl;
 
-            // Update path up until this neighbor
-            newPath.addNewCharger(neighbor, newCar);
-            chargerPath[neighbor] = newPath;
+            
 
             //std::cout << "after mod: " << newPath.getOutputStr() << std::endl;
 
@@ -188,6 +206,7 @@ bool Astar::solve(){
                 openPQueue.push(neighborChargerCost);
                 // Continue if cost from initial to neighbor charge is greater than stored cost
             } else if (newCost > costToArrive[neighbor]){
+                std::cout << "new cost > costToArrivew" << std::endl;
                 continue;
             }
 
@@ -195,12 +214,18 @@ bool Astar::solve(){
             costToArrive[neighbor] = newCost;
             //estCostThrough[neighbor] = newCost+time(neighbor, goalCharger);
             estCostThrough[neighbor] = newCost+cost(neighbor, goalCharger);
+
+            // Update path up until this neighbor
+            newPath.addNewCharger(neighbor, newCar);
+            std::cout << newPath.getOutputStr() << std::endl;
+            chargerPath[neighbor] = newPath;
             //std::cout << "-----------End of neigh-----" << std::endl;
             //std::cout << " " << std::endl;
         }
-        //std::cout << "----------------End of loop:----------" << std::endl;
+        std::cout << "----------------End of loop:----------" << std::endl;
         //std::cout << " " << std::endl;
         //std::cout << " " << std::endl;
+        //break;
     }
     return false;
 }
