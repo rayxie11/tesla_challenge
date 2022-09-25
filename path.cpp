@@ -35,7 +35,7 @@ Path::Path(const Path& rhs){
 Path::Path(){}
 
 
-// Return the path solution string
+// Return the path solution string excluding initial and goal chargers
 std::string Path::getOutputStr(){
     /*
     std::string res = "";
@@ -55,37 +55,8 @@ std::string Path::getOutputStr(){
     return res;
 }
 
-/*
-// Update path and chargerPQ for maxCharge >= chargeRequired
-void Path::updateMaxGeqReq(){
-    // Update path
-    path[bestCharger.idx]= bestCharger;
 
-    // Update chargerPQ
-
-    chargerPQ.pop();
-    //chargerPQ.push(bestCharger);
-    bestCharger = chargerPQ.top();
-}
-
-
-// Update path and chargerPQ for maxCharge < chargeRequired
-bool Path::updateMaxLesReq(){
-    // If chargerPQ has less than one element, no best charger
-    if (chargerPQ.size() < 1){
-        return false;
-    }
-
-    // Update path
-    path[bestCharger.idx] = bestCharger;
-
-    // Update chargerPQ
-    chargerPQ.pop();
-    bestCharger = chargerPQ.top();
-    return true;
-}
-*/
-
+// Verify if the current path has any over/undercharging
 bool Path::verify(){
     double batt = 320.0;
     for (int i = 1; i < path.size(); i++){
@@ -104,27 +75,36 @@ bool Path::verify(){
 }
 
 
-// Go through all chargers and return the max amount that can be charged
+// Go from the best charger and return the max amount that can be charged in current path
 double Path::checkMaxCharge(double proposedCharge, int idx){
     int tracker = idx;
     int orgIdx = idx;
     double maxCharge = proposedCharge;
+
+    // Find the lowest allowed charge from the best charger
     while (idx < path.size()){
         double curMaxCharge = path[idx].car.topBatt-path[idx].car.batt;
         if (curMaxCharge < maxCharge){
+            // Update the charge and index in path
             maxCharge = curMaxCharge;
-            //tracker = idx;
+            tracker = idx;
         }
         idx ++;
     }
-    
-    if (tracker != orgIdx){
+    std::cout << "tracker: " << tracker << ", orgIdx: " << orgIdx << std::endl;
+    std::cout << "before: " << chargerPQ.top().second << std::endl;
+    // Skip to charger with lowest allowed charge (charging at any previous charger is futile)
+    if (maxCharge == 0){
+        chargerPQ.pop();
+    } else if (tracker != orgIdx){
         std::pair<double, int> topPair = chargerPQ.top();
         while (topPair.second != orgIdx){
             chargerPQ.pop();
             topPair = chargerPQ.top();
         }
+        chargerPQ.pop();
     }
+    std::cout << "after: " << chargerPQ.top().second << std::endl;
     return maxCharge;
 }
 
@@ -137,23 +117,18 @@ bool Path::chargeCar(double chargeRequired){
         int idx = chargerPQ.top().second;
 
         std::cout << path[idx].name << ":" << std::endl;
-        
-        /*
-        std::cout << "before 0: " << getOutputStr() << std::endl;
-        if (path[idx].car.batt >= 320){
-            chargerPQ.pop();
-            continue;
-        }*/
+
 
         double actualCharge = checkMaxCharge(chargeRequired, idx);
         path[idx].chargeTime += actualCharge/path[idx].speed;
         path[idx].car.batt += actualCharge;
 
-        
+        std::cout << "actual: " << actualCharge << "; required: " << chargeRequired << std::endl;
+        /*
         if (actualCharge < chargeRequired){
             chargerPQ.pop();
         }
-        /*
+        
         if (path[idx].car.batt >= path[idx].car.topBatt){
             chargerPQ.pop();
         }*/
@@ -203,6 +178,7 @@ bool Path::chargeCar(double chargeRequired){
     if (chargeRequired > 0.0){
         return false;
     }
+    /*
     std::cout << " " << std::endl;
     std::cout << "----check----" << std::endl;
     bool check = verify();
@@ -210,7 +186,7 @@ bool Path::chargeCar(double chargeRequired){
     
     if (!check){
         return false;
-    }
+    }*/
     return true;
 }
 

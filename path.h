@@ -22,23 +22,18 @@ public:
 
     // Member functions
     double checkMaxCharge(double proposedCharge, int idx);
-
     bool chargeCar(double chargeRequired);
-    bool updateMaxLesReq();
     bool verify();
-    void updateMaxGeqReq();
     void addNewCharger(std::string charger, tsl::car car);
     std::string getOutputStr();
     cha::waypoint getCurWayPoint();
 
     // Storage params
     //double totTime;
-    //cha::waypoint bestCharger;
     std::priority_queue<std::pair<double, int>> chargerPQ;
 
 private:
     // Storage params
     std::vector<cha::waypoint> path;
-
     std::unordered_map<std::string, std::array<double, 3>> chargerMap;
 };
