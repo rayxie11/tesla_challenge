@@ -106,8 +106,8 @@ bool Path::verify(){
 
 // Go through all chargers and return the max amount that can be charged
 double Path::checkMaxCharge(double proposedCharge, int idx){
-    //int tracker = idx;
-    //int orgIdx = idx;
+    int tracker = idx;
+    int orgIdx = idx;
     double maxCharge = proposedCharge;
     while (idx < path.size()){
         double curMaxCharge = path[idx].car.topBatt-path[idx].car.batt;
@@ -117,14 +117,14 @@ double Path::checkMaxCharge(double proposedCharge, int idx){
         }
         idx ++;
     }
-    /*
+    
     if (tracker != orgIdx){
         std::pair<double, int> topPair = chargerPQ.top();
-        while (topPair.second != idx){
+        while (topPair.second != orgIdx){
             chargerPQ.pop();
             topPair = chargerPQ.top();
         }
-    }*/
+    }
     return maxCharge;
 }
 
