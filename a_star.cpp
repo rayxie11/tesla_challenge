@@ -22,8 +22,7 @@ Astar::Astar(std::unordered_map<std::string, std::array<double, 3>>& chargerMap,
                 this->chargerMap = chargerMap;
                 
                 // Calculate initial to goal charger estimated cost
-                //double initEstCost = time(this->initCharger, this->goalCharger);
-                double initEstCost = dist(this->initCharger, this->goalCharger);
+                double initEstCost = cost(this->initCharger, this->goalCharger);
                 cha::toChargerCost initChargerEstCost(this->initCharger, initEstCost);
 
                 // openPQueue stores chargers to be visited in PQueue
@@ -84,20 +83,8 @@ double Astar::time(std::string s1, std::string s2){
 // Calculate the cost of travelling between chargers
 double Astar::cost(std::string s1, std::string s2){
     return time(s1, s2)-0.01*chargerMap[s1][2];
-    //return dist(s1, s2);
 }
 
-
-// Show PQ elements
-void Astar::showPQ(){
-    std::priority_queue<cha::toChargerCost> copy = openPQueue;
-    std::string res = "";
-    while (!copy.empty()){
-        res += copy.top().name+", ";
-        copy.pop();
-    }
-    std::cout << res << std::endl;
-}
 
 
 // Astar solver function

@@ -27,8 +27,6 @@ public:
     bool solve();
     std::string showPath();
 
-    void showPQ();
-
 private:
     // Params passed in from constructor
     double v;
