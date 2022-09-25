@@ -29,7 +29,7 @@ public:
     cha::waypoint getCurWayPoint();
 
     // Storage params
-    //double totTime;
+    double totTime;
     std::priority_queue<std::pair<double, int>> chargerPQ;
 
 private:

@@ -19,7 +19,7 @@ Path::Path(std::unordered_map<std::string, std::array<double, 3>>& chargerMap,
             this->path.push_back(initWayPoint);
 
             // Total running time on this path
-            //this->totTime = 0.0;
+            this->totTime = 0.0;
            }
 
 
@@ -121,8 +121,12 @@ bool Path::chargeCar(double chargeRequired){
 
 
         double actualCharge = checkMaxCharge(chargeRequired, idx);
-        path[idx].chargeTime += actualCharge/path[idx].speed;
+
+        double t = actualCharge/path[idx].speed;
+        path[idx].chargeTime += t;
         path[idx].car.batt += actualCharge;
+
+        totTime += t;
 
         //std::cout << "actual: " << actualCharge << "; required: " << chargeRequired << std::endl;
         /*
@@ -201,11 +205,8 @@ void Path::addNewCharger(std::string charger, tsl::car car){
     // Push into path vector
     path.push_back(newWayPoint);
 
-    // Update best charger
-    //bestCharger = chargerPQ.top();
-
     // Add travelling distance from current charger to new charger
-    //totTime += Util::dist(chargerMap, getCurWayPoint().name, charger)/car.v;
+    totTime += Util::dist(chargerMap, getCurWayPoint().name, charger)/car.v;
 }
 
             
