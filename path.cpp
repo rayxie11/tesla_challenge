@@ -72,15 +72,8 @@ double Path::checkMaxCharge(double proposedCharge, int idx){
         idx ++;
     }
 
-    // Skip to charger with lowest allowed charge (charging at any previous charger is futile)
-    if (maxCharge == 0){
-        chargerPQ.pop();
-    } else if (tracker != orgIdx){
-        std::pair<double, int> topPair = chargerPQ.top();
-        while (topPair.second != orgIdx){
-            chargerPQ.pop();
-            topPair = chargerPQ.top();
-        }
+    // If maxCharge is 0, pop the current bestCharger
+    if (maxCharge == 0.0){
         chargerPQ.pop();
     }
     return maxCharge;
@@ -88,6 +81,21 @@ double Path::checkMaxCharge(double proposedCharge, int idx){
 
 
 // Charge the car at bestCharger
+/* This is the most confusing part for me so here's more details
+ * on the logic implemented here. chargerPQ stores all the chargers 
+ * in a priority queue (faster charging speed, greater priority). 
+ * When the car needs to be charged, we want to backtrack to the 
+ * fastest charger and see how much we can charge there (limited 
+ * by the battery left in car at that charger). Another limiting
+ * factor is the available charge left in the car for the following
+ * chargers after the fastest charger. For example, if I can charge
+ * 20 km at the current fastest charger but can only charge 10 km
+ * at a charger trailing the current fastest charger, then I can
+ * only charge a max of 10 km at the current fastest charger. Pop 
+ * from chargerPQ if the actual charge is 0. We continue this 
+ * process until either the required charge turns 0 or chargerPQ
+ * is empty (charge unsuccessful, give up this path). 
+*/
 bool Path::chargeCar(double chargeRequired){
     // Charge until required charge is 0 or chargerPQ is empty
     while (!chargerPQ.empty() && chargeRequired > 0){
@@ -95,6 +103,11 @@ bool Path::chargeCar(double chargeRequired){
         int idx = chargerPQ.top().second;
         // Calculate the actual charge that can be charged
         double actualCharge = checkMaxCharge(chargeRequired, idx);
+
+        // If actualCharge = 0, continue
+        if (actualCharge == 0.0){
+            continue;
+        }
 
         // Calculate the charging time
         double t = actualCharge/path[idx].speed;
