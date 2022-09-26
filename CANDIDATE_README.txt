@@ -5,7 +5,7 @@ that I have written to break down this problem into smaller subsections.
 
 "a_star.h" and "astar.cpp" contain the class Astar which is a framework for the A* search algorithm.
 
-"structs.h" contains three structs that are helpful in solving this Challenge
+"structs.h" contains three structs that are helpful in solving this Challenge.
 
 "path.h" and "path.cpp" contain the class Path which stores the waypoints from initial to goal chargers.
 
@@ -15,4 +15,4 @@ To compile use:
 To run use:
     ./candidate_solution <initial charger> <final charger>
 
-The result will be displayed in the same Terminal where "candidate_solution" is run.
+The result will be displayed in the same Terminal window where "candidate_solution" is run.
